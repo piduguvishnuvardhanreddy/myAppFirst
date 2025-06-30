@@ -59,13 +59,15 @@ exports.forgotPassword = async (req, res) => {
   const user = await User.findOne({ email });
   if (!user) return res.status(404).json({ message: 'User not found' });
 
-  const token = crypto.randomBytes(32).toString('hex');
-  storeToken(token, user._id);
+  const token = jwt.sign(
+    { userId: user._id },
+    process.env.JWT_SECRET,
+    { expiresIn: '15m' }
+  );
 
-  // Instead of emailing, return it to frontend
   res.json({
     message: 'Use this token to reset password within 15 minutes',
-    token
+    token,
   });
 };
 
